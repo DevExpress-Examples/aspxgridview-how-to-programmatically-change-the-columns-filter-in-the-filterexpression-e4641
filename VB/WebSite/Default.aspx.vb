@@ -13,8 +13,8 @@ Partial Public Class _Default
         Dim grid As ASPxGridView = TryCast(sender, ASPxGridView)
         ModifyFilterExpression(ASPxComboBox1.Value.ToString(), ASPxTextBox1.Value, grid)
     End Sub
-    Protected Sub ModifyFilterExpression(ByVal FieldName As String, ByVal value As Object, ByVal victim As ASPxGridView)
-        Dim criterias = CriteriaColumnAffinityResolver.SplitByColumns(CriteriaOperator.Parse(victim.FilterExpression))
+    Protected Sub ModifyFilterExpression(ByVal FieldName As String, ByVal value As Object, ByVal targetGrid As ASPxGridView)
+        Dim criterias = CriteriaColumnAffinityResolver.SplitByColumnNames(CriteriaOperator.Parse(targetGrid.FilterExpression)).Item2
 
         Dim co As CriteriaOperator = Nothing
         If FieldName = "ProductName" Then
@@ -23,12 +23,12 @@ Partial Public Class _Default
         Else
             co = New BinaryOperator(FieldName, value, BinaryOperatorType.Equal)
         End If
-        If Not criterias.Keys.Contains(New OperandProperty(FieldName)) Then
-            criterias.Add(New OperandProperty(FieldName), co)
+        If Not criterias.Keys.Contains(FieldName) Then
+            criterias.Add(FieldName, co)
         Else
-            criterias(New OperandProperty(FieldName)) = co
+            criterias(FieldName) = co
         End If
-        victim.FilterExpression = CriteriaOperator.ToString(GroupOperator.And(criterias.Values))
+        targetGrid.FilterExpression = CriteriaOperator.ToString(GroupOperator.And(criterias.Values))
     End Sub
 
 End Class

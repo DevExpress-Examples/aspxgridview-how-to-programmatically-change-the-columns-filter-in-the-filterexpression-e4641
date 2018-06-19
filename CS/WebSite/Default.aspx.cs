@@ -10,8 +10,8 @@ public partial class _Default : System.Web.UI.Page {
         ASPxGridView grid = sender as ASPxGridView;
         ModifyFilterExpression(ASPxComboBox1.Value.ToString(), ASPxTextBox1.Value, grid);
     }
-    protected void ModifyFilterExpression(string FieldName, object value, ASPxGridView victim) {
-        var criterias = CriteriaColumnAffinityResolver.SplitByColumns(CriteriaOperator.Parse(victim.FilterExpression));
+    protected void ModifyFilterExpression(string FieldName, object value, ASPxGridView targetGrid) {
+        var criterias = CriteriaColumnAffinityResolver.SplitByColumnNames(CriteriaOperator.Parse(targetGrid.FilterExpression)).Item2;
 
         CriteriaOperator co = null;
         if (FieldName == "ProductName") {
@@ -19,11 +19,11 @@ public partial class _Default : System.Web.UI.Page {
             co = new FunctionOperator("Like", new OperandProperty(FieldName), new OperandValue(value));
         } else
             co = new BinaryOperator(FieldName, value, BinaryOperatorType.Equal);
-        if (!criterias.Keys.Contains(new OperandProperty(FieldName)))
-            criterias.Add(new OperandProperty(FieldName), co); 
+        if (!criterias.Keys.Contains(FieldName))
+            criterias.Add(FieldName, co); 
         else
-            criterias[new OperandProperty(FieldName)] = co; 
-        victim.FilterExpression = CriteriaOperator.ToString(GroupOperator.And(criterias.Values));
+            criterias[FieldName] = co; 
+        targetGrid.FilterExpression = CriteriaOperator.ToString(GroupOperator.And(criterias.Values));
     }
 
 }
